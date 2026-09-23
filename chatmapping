@@ -1,1 +1,274 @@
-
+void automation.mapCategory2(String leadid)
+{
+leadRecord = zoho.crm.getRecordById("Leads",leadid);
+interestValue = leadRecord.get("Interest");
+// ===== Lead Source mapping: "Website Visit" -> "IGP" =====
+leadSource = leadRecord.get("Lead_Source");
+if(leadSource != null && leadSource.trim() == "Website Visit")
+{
+	sourceMap = Map();
+	sourceMap.put("Lead_Source","IGP");
+	sourceResponse = zoho.crm.updateRecord("Leads",leadid,sourceMap);
+	info sourceResponse;
+}
+categoryMap = Map();
+// English (Website) - capacity
+categoryMap.put("Individual Interested in Tourism","Individual");
+categoryMap.put("Individual Interested in Relocation to Panama","Individual");
+categoryMap.put("I'm already a resident in Panama","Individual");
+categoryMap.put("I'm a Community organizer","Community");
+// English (Website) - capacity — Sept 2026 update: same values without the old prefix wording
+categoryMap.put("Interested in Tourism","Individual");
+categoryMap.put("Interested in Relocation to Panama","Individual");
+categoryMap.put("Already a resident in Panama","Individual");
+categoryMap.put("Community organizer","Community");
+categoryMap.put("Dueño de Negocio","Community");
+// English (Facebook, <20 char) - capacity
+categoryMap.put("Visiting Panama","Individual");
+categoryMap.put("Moving to Panama","Individual");
+categoryMap.put("Panama Resident","Individual");
+categoryMap.put("Community Leader","Community");
+// English (Website, short button labels) - capacity
+categoryMap.put("Interest in Tourism","Individual");
+categoryMap.put("Relocate to Panama","Individual");
+categoryMap.put("Community Organizer","Community");
+// Spanish (Website) - capacity
+categoryMap.put("Persona interesada en el turismo","Individual");
+categoryMap.put("Persona interesada en trasladarse a Panamá","Individual");
+categoryMap.put("Ya soy residente en Panamá.","Individual");
+categoryMap.put("Soy organizador comunitario","Community");
+// Spanish (Website, short button labels) - capacity
+categoryMap.put("Interés Turismo","Individual");
+categoryMap.put("Mudarse a Panamá","Individual");
+categoryMap.put("Residente Panamá","Individual");
+categoryMap.put("Líder Comunitario","Community");
+// Spanish (Website, short button labels) - Sept 2026 fix: missing "en"
+categoryMap.put("Interés en Turismo","Individual");
+categoryMap.put("Residente en Panamá","Individual");
+// Spanish (Website) - business type — LEGACY labels, kept for old/existing records
+categoryMap.put("Visita","Visit");
+categoryMap.put("Experiencia","Experience");
+categoryMap.put("Trasladarse","Relocate");
+categoryMap.put("Permanecer","Stay");
+categoryMap.put("Vivir","Live");
+// Spanish (Website) - business type — CURRENT bot labels (Sept 2026 flow, as originally entered)
+categoryMap.put("Visita : Hoteles","Visit");
+categoryMap.put("Experiencia: Tours","Experience");
+categoryMap.put("Mudanza: Legal","Relocate");
+categoryMap.put("Estadía: Inmuebles","Stay");
+categoryMap.put("Vivir: Servicios","Live");
+// Spanish (Website) - business type — Sept 2026 CORRECTED labels (fixes spacing/wording typos above)
+categoryMap.put("Visita: Hoteles","Visit");
+categoryMap.put("Reubicación: Legal","Relocate");
+categoryMap.put("Reside: Inmuebles","Stay");
+categoryMap.put("Vive: Servicios","Live");
+// English business type - LEGACY labels (already matched CRM picklist verbatim)
+categoryMap.put("Visit","Visit");
+categoryMap.put("Experience","Experience");
+categoryMap.put("Relocate","Relocate");
+categoryMap.put("Stay","Stay");
+categoryMap.put("Live","Live");
+// English business type - CURRENT bot labels (Sept 2026 flow, as originally entered)
+categoryMap.put("Visit : Hotels","Visit");
+categoryMap.put("Experience: Tours","Experience");
+categoryMap.put("Relocate: Legal","Relocate");
+categoryMap.put("Stay: Property","Stay");
+categoryMap.put("Live: Services","Live");
+// English business type - Sept 2026 CORRECTED label (fixes spacing typo above)
+categoryMap.put("Visit: Hotels","Visit");
+skipValues = List();
+skipValues.add("Business Owner in Panama");
+skipValues.add("Propietario de negocio en Panamá");
+skipValues.add("Business Owner");
+if(categoryMap.containsKey(interestValue))
+{
+	newValue = categoryMap.get(interestValue);
+	if(leadRecord.get("Top_Category") != newValue)
+	{
+		updateMap = Map();
+		updateMap.put("Top_Category",newValue);
+		response = zoho.crm.updateRecord("Leads",leadid,updateMap);
+		info response;
+	}
+}
+else if(skipValues.contains(interestValue))
+{
+	info "Skipped: Business owner - awaiting pillar selection";
+}
+// ===== Pillar field mapping (Top_Category -> Pillar Audience/Buyer/Outcome/Pain/Impulso Price, EN/ES) =====
+leadRecord = zoho.crm.getRecordById("Leads",leadid);
+topCategory = leadRecord.get("Top_Category");
+// ===== Community mapping: Company -> Organization_Name =====
+if(topCategory == "Community")
+{
+	companyValue = leadRecord.get("Company");
+	if(companyValue != null && companyValue.trim() != "")
+	{
+		if(leadRecord.get("Organization_Name") != companyValue.trim())
+		{
+			orgMap = Map();
+			orgMap.put("Organization_Name",companyValue.trim());
+			orgResponse = zoho.crm.updateRecord("Leads",leadid,orgMap);
+			info orgResponse;
+		}
+	}
+	else
+	{
+		info "Skipped: Top_Category is Community but Company is empty - no Organization_Name mapping";
+	}
+}
+audienceEN = Map();
+audienceEN.put("Experience","tour operators");
+audienceEN.put("Live","local businesses");
+audienceEN.put("Relocate","relocation services");
+audienceEN.put("Stay","real estate agencies");
+audienceEN.put("Visit","hotels");
+audienceES = Map();
+audienceES.put("Experience","operadores turísticos");
+audienceES.put("Live","negocios locales");
+audienceES.put("Relocate","servicios de reubicación");
+audienceES.put("Stay","agencias inmobiliarias");
+audienceES.put("Visit","hoteles");
+buyerEN = Map();
+buyerEN.put("Experience","visitors deciding what to do while they are here");
+buyerEN.put("Live","expats already living here");
+buyerEN.put("Relocate","people planning a move to Panama");
+buyerEN.put("Stay","buyers and renters searching from abroad");
+buyerEN.put("Visit","travellers planning a trip to Panama");
+buyerES = Map();
+buyerES.put("Experience","los visitantes que deciden qué hacer durante su estadía");
+buyerES.put("Live","los extranjeros que ya viven aquí");
+buyerES.put("Relocate","las personas que planean mudarse a Panamá");
+buyerES.put("Stay","los compradores e inquilinos que buscan desde el exterior");
+buyerES.put("Visit","los viajeros que planean un viaje a Panamá");
+outcomeEN = Map();
+outcomeEN.put("Experience","tour bookings");
+outcomeEN.put("Live","new local customers");
+outcomeEN.put("Relocate","client enquiries");
+outcomeEN.put("Stay","property enquiries");
+outcomeEN.put("Visit","direct bookings");
+outcomeES = Map();
+outcomeES.put("Experience","reservas de tours");
+outcomeES.put("Live","clientes locales nuevos");
+outcomeES.put("Relocate","consultas de clientes");
+outcomeES.put("Stay","consultas de propiedades");
+outcomeES.put("Visit","reservas directas");
+painEN = Map();
+painEN.put("Experience","depending on walk-ins and whatever the concierge recommends");
+painEN.put("Live","the expat community defaulting to whoever gets recommended in a Facebook group");
+painEN.put("Relocate","clients arriving already committed to someone they found online");
+painEN.put("Stay","foreign buyers never finding your listings");
+painEN.put("Visit","rooms sitting empty outside the high season");
+painES = Map();
+painES.put("Experience","depender de quien pase por la calle y de lo que recomiende el conserje");
+painES.put("Live","que la comunidad extranjera recurra a quien se recomiende en un grupo de Facebook");
+painES.put("Relocate","que los clientes lleguen ya comprometidos con alguien que encontraron en internet");
+painES.put("Stay","que los compradores extranjeros nunca lleguen a ver sus propiedades");
+painES.put("Visit","habitaciones vacías fuera de temporada alta");
+impulsoPriceEN = Map();
+impulsoPriceEN.put("Experience","$75/month or $750/year");
+impulsoPriceEN.put("Live","$45/month or $450/year");
+impulsoPriceEN.put("Relocate","$205/month or $2,050/year");
+impulsoPriceEN.put("Stay","$145/month or $1,450/year");
+impulsoPriceEN.put("Visit","$95/month or $950/year");
+impulsoPriceES = Map();
+impulsoPriceES.put("Experience","$75/mes o $750/año");
+impulsoPriceES.put("Live","$45/mes o $450/año");
+impulsoPriceES.put("Relocate","$205/mes o $2,050/año");
+impulsoPriceES.put("Stay","$145/mes o $1,450/año");
+impulsoPriceES.put("Visit","$95/mes o $950/año");
+// Monthly-only Impulso price (no annual figure) - separate fields
+monthlyImpulsoEN = Map();
+monthlyImpulsoEN.put("Experience","$75/month");
+monthlyImpulsoEN.put("Live","$45/month");
+monthlyImpulsoEN.put("Relocate","$205/month");
+monthlyImpulsoEN.put("Stay","$145/month");
+monthlyImpulsoEN.put("Visit","$95/month");
+monthlyImpulsoES = Map();
+monthlyImpulsoES.put("Experience","$75/mes");
+monthlyImpulsoES.put("Live","$45/mes");
+monthlyImpulsoES.put("Relocate","$205/mes");
+monthlyImpulsoES.put("Stay","$145/mes");
+monthlyImpulsoES.put("Visit","$95/mes");
+impulsoURL = Map();
+impulsoURL.put("Experience","https://www.igopanama.com/checkout/experience-impulso");
+impulsoURL.put("Live","https://www.igopanama.com/checkout/live-impulso");
+impulsoURL.put("Relocate","https://www.igopanama.com/checkout/relocate-impulso");
+impulsoURL.put("Stay","https://www.igopanama.com/checkout/stay-impulso");
+impulsoURL.put("Visit","https://www.igopanama.com/checkout/visit-impulso");
+verificadoURL = Map();
+verificadoURL.put("Experience","https://www.igopanama.com/checkout/experience-verificado");
+verificadoURL.put("Live","https://www.igopanama.com/checkout/live-verificado");
+verificadoURL.put("Relocate","https://www.igopanama.com/checkout/relocate-verificado");
+verificadoURL.put("Stay","https://www.igopanama.com/checkout/stay-verificado");
+verificadoURL.put("Visit","https://www.igopanama.com/checkout/visit-verificado");
+if(audienceEN.containsKey(topCategory))
+{
+	pillarUpdateMap = Map();
+	if(leadRecord.get("Pillar_Audience_EN") != audienceEN.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Audience_EN",audienceEN.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Audience_ES") != audienceES.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Audience_ES",audienceES.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Buyer_EN") != buyerEN.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Buyer_EN",buyerEN.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Buyer_ES") != buyerES.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Buyer_ES",buyerES.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Outcome_EN") != outcomeEN.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Outcome_EN",outcomeEN.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Outcome_ES") != outcomeES.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Outcome_ES",outcomeES.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Pain_EN") != painEN.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Pain_EN",painEN.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Pain_ES") != painES.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Pain_ES",painES.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Impulso_Price_EN") != impulsoPriceEN.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Impulso_Price_EN",impulsoPriceEN.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Impulso_Price_ES") != impulsoPriceES.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Impulso_Price_ES",impulsoPriceES.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Monthly_Impulso_EN") != monthlyImpulsoEN.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Monthly_Impulso_EN",monthlyImpulsoEN.get(topCategory));
+	}
+	if(leadRecord.get("Pillar_Monthly_Impulso_ES") != monthlyImpulsoES.get(topCategory))
+	{
+		pillarUpdateMap.put("Pillar_Monthly_Impulso_ES",monthlyImpulsoES.get(topCategory));
+	}
+	if(leadRecord.get("Checkout_Impulso_URL") != impulsoURL.get(topCategory))
+	{
+		pillarUpdateMap.put("Checkout_Impulso_URL",impulsoURL.get(topCategory));
+	}
+	if(leadRecord.get("Checkout_Verificado_URL") != verificadoURL.get(topCategory))
+	{
+		pillarUpdateMap.put("Checkout_Verificado_URL",verificadoURL.get(topCategory));
+	}
+	if(pillarUpdateMap.size() > 0)
+	{
+		pillarResponse = zoho.crm.updateRecord("Leads",leadid,pillarUpdateMap);
+		info pillarResponse;
+	}
+}
+else
+{
+	info "Skipped: Top_Category is " + topCategory + " - no pillar mapping (Individual/Community/-None-)";
+}
+}
