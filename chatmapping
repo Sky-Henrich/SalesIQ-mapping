@@ -1,5 +1,7 @@
 void automation.mapCategory2(String leadid)
 {
+// ===== Duplicate check first: if the lead already exists, continue with the existing lead =====
+leadid = standalone.dedupeLead(leadid);
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 interestValue = leadRecord.get("Interest");
 // ===== Lead Source mapping: "Website Visit" -> "IGP" =====

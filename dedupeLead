@@ -1,0 +1,81 @@
+string standalone.dedupeLead(String leadid)
+{
+// ===== Duplicate check: if this lead already exists (same Email, or same Phone when Email is empty),
+// copy the new non-empty values onto the existing lead, delete the new one, and return the existing id.
+// Returns the id of the lead that should keep being processed.
+newLead = zoho.crm.getRecordById("Leads",leadid);
+email = ifnull(newLead.get("Email"),"").trim();
+phone = ifnull(newLead.get("Phone"),"").trim();
+if(email != "")
+{
+	criteria = "(Email:equals:" + email + ")";
+}
+else if(phone != "")
+{
+	criteria = "(Phone:equals:" + phone + ")";
+}
+else
+{
+	info "Dedupe skipped: lead has no Email or Phone";
+	return leadid;
+}
+matches = zoho.crm.searchRecords("Leads",criteria);
+// Keep the oldest matching lead (lowest id) as the master record
+existingId = null;
+for each rec in matches
+{
+	recId = rec.get("id");
+	if(recId != null && recId != leadid)
+	{
+		if(existingId == null || recId.toLong() < existingId.toLong())
+		{
+			existingId = recId;
+		}
+	}
+}
+if(existingId == null)
+{
+	info "No duplicate found";
+	return leadid;
+}
+existingLead = zoho.crm.getRecordById("Leads",existingId);
+// Fields never copied from the new lead: system fields, ownership, pipeline status,
+// original attribution, opt-out and the cadence gate (set later by mapCategory2)
+skipFields = List();
+skipFields.addAll({"id","Owner","Layout","Created_By","Modified_By","Created_Time","Modified_Time","Last_Activity_Time","Tag","Record_Image","Lead_Status","Lead_Source","Email_Opt_Out","Unsubscribed_Mode","Unsubscribed_Time","Cadence_Ready","Currency","Exchange_Rate"});
+updateMap = Map();
+for each key in newLead.keys()
+{
+	value = newLead.get(key);
+	if(!key.startsWith("$") && !skipFields.contains(key) && value != null)
+	{
+		valueText = value.toString().trim();
+		// Skip blanks and unticked checkboxes so new data never erases existing data
+		if(valueText != "" && valueText != "false" && valueText != "[]" && value != existingLead.get(key))
+		{
+			updateMap.put(key,value);
+		}
+	}
+}
+if(updateMap.size() > 0)
+{
+	updateResponse = zoho.crm.updateRecord("Leads",existingId,updateMap);
+	info updateResponse;
+	if(updateResponse.get("id") == null)
+	{
+		info "Dedupe aborted: could not update existing lead " + existingId + ", keeping new lead";
+		return leadid;
+	}
+}
+// Delete the new duplicate (goes to the Recycle Bin). Requires a Zoho CRM connection
+// named "crm_connection" with scope ZohoCRM.modules.leads.ALL
+deleteResponse = invokeurl
+[
+	url :"https://www.zohoapis.com/crm/v8/Leads?ids=" + leadid
+	type :DELETE
+	connection:"crm_connection"
+];
+info deleteResponse;
+info "Duplicate merged: " + leadid + " -> " + existingId;
+return existingId;
+}
