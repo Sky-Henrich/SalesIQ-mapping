@@ -265,6 +265,21 @@ if(audienceEN.containsKey(topCategory))
 	{
 		pillarResponse = zoho.crm.updateRecord("Leads",leadid,pillarUpdateMap);
 		info pillarResponse;
+		if(pillarResponse.get("id") == null)
+		{
+			info "Cadence_Ready not set: pillar update failed";
+			return;
+		}
+	}
+	// ===== Cadence gate: flag the lead as ready only after every merge field is written =====
+	// The cadence custom view filters on Cadence_Ready = true, so enrollment happens
+	// seconds after the sync finishes instead of before the merge fields exist.
+	if(leadRecord.get("Cadence_Ready") != true)
+	{
+		readyMap = Map();
+		readyMap.put("Cadence_Ready",true);
+		readyResponse = zoho.crm.updateRecord("Leads",leadid,readyMap);
+		info readyResponse;
 	}
 }
 else
