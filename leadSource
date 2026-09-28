@@ -10,4 +10,6 @@ if(leadSource != null && leadSource.trim() == "Chat")
 	updateResult = zoho.crm.updateRecord("Leads",leadId,updateMap);
 	info updateResult;
 }
+// SalesIQ adds its chat note right after creating the lead, so clean it up here too
+standalone.removeLanguageNote(leadId);
 }

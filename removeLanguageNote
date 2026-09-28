@@ -1,0 +1,32 @@
+void standalone.removeLanguageNote(String leadid)
+{
+// ===== Remove SalesIQ's "chat with Customer" note when its only question is the language button =====
+// Language is already synced to its own field. Notes with a real question are kept.
+// Requires crm_connection to include scope ZohoCRM.modules.notes.ALL
+leadNotes = zoho.crm.getRelatedRecords("Notes","Leads",leadid);
+info "Notes found: " + leadNotes.size();
+for each note in leadNotes
+{
+	// SalesIQ may put the heading in the title or the content, with HTML or line breaks,
+	// so compare letters and digits only: "Question : English<br>" -> "questionenglishbr"
+	rawText = ifnull(note.get("Note_Title"),"") + " " + ifnull(note.get("Note_Content"),"");
+	info "Note " + note.get("id") + ": " + rawText;
+	plainText = rawText.getAlphaNumeric().toLowerCase();
+	if(plainText.endsWith("br"))
+	{
+		plainText = plainText.subString(0,plainText.length() - 2);
+	}
+	isSalesIQNote = plainText.contains("zohosalesiqchatwithcustomer");
+	isLanguageOnly = plainText.endsWith("questionenglish") || plainText.endsWith("questionespañol") || plainText.endsWith("questionespaol") || plainText.endsWith("questionespanol");
+	if(isSalesIQNote && isLanguageOnly)
+	{
+		noteDelete = invokeurl
+		[
+			url :"https://www.zohoapis.com/crm/v8/Notes?ids=" + note.get("id")
+			type :DELETE
+			connection:"crm_connection"
+		];
+		info noteDelete;
+	}
+}
+}

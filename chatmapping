@@ -4,25 +4,8 @@ void automation.mapCategory2(String leadid)
 leadid = standalone.dedupeLead(leadid);
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 interestValue = leadRecord.get("Interest");
-// ===== Remove SalesIQ's "chat with Customer" note when its only question is the language button =====
-// Language is already synced to its own field. Notes with a real question are kept.
-// Requires crm_connection to include scope ZohoCRM.modules.notes.ALL
-leadNotes = zoho.crm.getRelatedRecords("Notes","Leads",leadid);
-for each note in leadNotes
-{
-	// SalesIQ may put the heading in the title or in the content, so check both together
-	noteText = (ifnull(note.get("Note_Title"),"") + " " + ifnull(note.get("Note_Content"),"")).trim();
-	if(noteText.contains("Zoho SalesIQ chat with Customer") && (noteText.endsWith("Question : English") || noteText.endsWith("Question : Español")))
-	{
-		noteDelete = invokeurl
-		[
-			url :"https://www.zohoapis.com/crm/v8/Notes?ids=" + note.get("id")
-			type :DELETE
-			connection:"crm_connection"
-		];
-		info noteDelete;
-	}
-}
+// ===== Remove the language-only SalesIQ chat note (also runs from Lead_Source) =====
+standalone.removeLanguageNote(leadid);
 // ===== Lead Source mapping: "Website Visit" -> "IGP" (SalesIQ chatbot leads arrive as "Chat", see leadSource) =====
 leadSource = leadRecord.get("Lead_Source");
 if(leadSource != null && leadSource.trim() == "Website Visit")
