@@ -4,8 +4,6 @@ void automation.mapCategory2(String leadid)
 leadid = standalone.dedupeLead(leadid);
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 interestValue = leadRecord.get("Interest");
-// ===== Remove the language-only SalesIQ chat note (also runs from Lead_Source) =====
-standalone.removeLanguageNote(leadid);
 // ===== Lead Source mapping: "Website Visit" -> "IGP" (SalesIQ chatbot leads arrive as "Chat", see leadSource) =====
 leadSource = leadRecord.get("Lead_Source");
 if(leadSource != null && leadSource.trim() == "Website Visit")
