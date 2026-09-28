@@ -10,6 +10,12 @@ if(leadSource != null && leadSource.trim() == "Chat")
 	updateMap.put("Lead_Source","SalesIQ");
 	updateResult = zoho.crm.updateRecord("Leads",leadId,updateMap,Map(),"crm_connection");
 	info updateResult;
+	if(updateResult.get("id") == null)
+	{
+		// Connection failed (e.g. missing scope or being reconnected): update without it
+		updateResult = zoho.crm.updateRecord("Leads",leadId,updateMap);
+		info updateResult;
+	}
 	// ===== Chatbot leads only: remove SalesIQ's "chat with Customer" note when its only question is the language button =====
 	// Language is already synced to its own field. Notes with a real question are kept.
 	// Requires crm_connection to include scope ZohoCRM.modules.notes.ALL

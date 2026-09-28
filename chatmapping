@@ -4,14 +4,24 @@ void automation.mapCategory2(String leadid)
 leadid = standalone.dedupeLead(leadid);
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 interestValue = leadRecord.get("Interest");
-// ===== Lead Source mapping: "Website Visit" -> "IGP" (SalesIQ chatbot leads arrive as "Chat", see leadSource) =====
-leadSource = leadRecord.get("Lead_Source");
-if(leadSource != null && leadSource.trim() == "Website Visit")
+// ===== Lead Source mapping: "Website Visit" -> "IGP", "Chat" (SalesIQ chatbot) -> "SalesIQ" =====
+// Chat is also handled by Lead_Source; this is the backup if that function did not update it
+leadSourceMap = Map();
+leadSourceMap.put("Website Visit","IGP");
+leadSourceMap.put("Chat","SalesIQ");
+leadSource = ifnull(leadRecord.get("Lead_Source"),"").trim();
+if(leadSourceMap.containsKey(leadSource))
 {
 	sourceMap = Map();
-	sourceMap.put("Lead_Source","IGP");
+	sourceMap.put("Lead_Source",leadSourceMap.get(leadSource));
 	sourceResponse = zoho.crm.updateRecord("Leads",leadid,sourceMap,Map(),"crm_connection");
 	info sourceResponse;
+	if(sourceResponse.get("id") == null)
+	{
+		// Connection failed (e.g. missing scope or being reconnected): update without it
+		sourceResponse = zoho.crm.updateRecord("Leads",leadid,sourceMap);
+		info sourceResponse;
+	}
 }
 categoryMap = Map();
 // English (Website) - capacity
