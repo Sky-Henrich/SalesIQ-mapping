@@ -1,13 +1,14 @@
 void automation.Lead_Source(String leadId)
 {
 // ===== SalesIQ chatbot (Add Lead card) leads arrive as "Chat" -> "SalesIQ" =====
+// Updates go through crm_connection so the lead shows "Modified by" the user who authorized that connection
 leadRecord = zoho.crm.getRecordById("Leads",leadId);
 leadSource = leadRecord.get("Lead_Source");
 if(leadSource != null && leadSource.trim() == "Chat")
 {
 	updateMap = Map();
 	updateMap.put("Lead_Source","SalesIQ");
-	updateResult = zoho.crm.updateRecord("Leads",leadId,updateMap);
+	updateResult = zoho.crm.updateRecord("Leads",leadId,updateMap,Map(),"crm_connection");
 	info updateResult;
 	// ===== Chatbot leads only: remove SalesIQ's "chat with Customer" note when its only question is the language button =====
 	// Language is already synced to its own field. Notes with a real question are kept.

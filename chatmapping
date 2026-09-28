@@ -10,7 +10,7 @@ if(leadSource != null && leadSource.trim() == "Website Visit")
 {
 	sourceMap = Map();
 	sourceMap.put("Lead_Source","IGP");
-	sourceResponse = zoho.crm.updateRecord("Leads",leadid,sourceMap);
+	sourceResponse = zoho.crm.updateRecord("Leads",leadid,sourceMap,Map(),"crm_connection");
 	info sourceResponse;
 }
 categoryMap = Map();
@@ -89,7 +89,7 @@ if(categoryMap.containsKey(interestValue))
 	{
 		updateMap = Map();
 		updateMap.put("Top_Category",newValue);
-		response = zoho.crm.updateRecord("Leads",leadid,updateMap);
+		response = zoho.crm.updateRecord("Leads",leadid,updateMap,Map(),"crm_connection");
 		info response;
 	}
 }
@@ -110,7 +110,7 @@ if(topCategory == "Community")
 		{
 			orgMap = Map();
 			orgMap.put("Organization_Name",companyValue.trim());
-			orgResponse = zoho.crm.updateRecord("Leads",leadid,orgMap);
+			orgResponse = zoho.crm.updateRecord("Leads",leadid,orgMap,Map(),"crm_connection");
 			info orgResponse;
 		}
 	}
@@ -265,7 +265,7 @@ if(audienceEN.containsKey(topCategory))
 	}
 	if(pillarUpdateMap.size() > 0)
 	{
-		pillarResponse = zoho.crm.updateRecord("Leads",leadid,pillarUpdateMap);
+		pillarResponse = zoho.crm.updateRecord("Leads",leadid,pillarUpdateMap,Map(),"crm_connection");
 		info pillarResponse;
 		if(pillarResponse.get("id") == null)
 		{
@@ -280,7 +280,7 @@ if(audienceEN.containsKey(topCategory))
 	{
 		readyMap = Map();
 		readyMap.put("Cadence_Ready",true);
-		readyResponse = zoho.crm.updateRecord("Leads",leadid,readyMap);
+		readyResponse = zoho.crm.updateRecord("Leads",leadid,readyMap,Map(),"crm_connection");
 		info readyResponse;
 	}
 }

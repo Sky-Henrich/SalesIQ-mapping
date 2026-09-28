@@ -59,7 +59,7 @@ for each key in newLead.keys()
 }
 if(updateMap.size() > 0)
 {
-	updateResponse = zoho.crm.updateRecord("Leads",existingId,updateMap);
+	updateResponse = zoho.crm.updateRecord("Leads",existingId,updateMap,Map(),"crm_connection");
 	info updateResponse;
 	if(updateResponse.get("id") == null)
 	{
