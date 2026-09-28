@@ -1,0 +1,13 @@
+void automation.Lead_Source(String leadId)
+{
+// ===== SalesIQ chatbot (Add Lead card) leads arrive as "Chat" -> "SalesIQ" =====
+leadRecord = zoho.crm.getRecordById("Leads",leadId);
+leadSource = leadRecord.get("Lead_Source");
+if(leadSource != null && leadSource.trim() == "Chat")
+{
+	updateMap = Map();
+	updateMap.put("Lead_Source","SalesIQ");
+	updateResult = zoho.crm.updateRecord("Leads",leadId,updateMap);
+	info updateResult;
+}
+}

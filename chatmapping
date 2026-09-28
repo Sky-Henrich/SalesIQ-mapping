@@ -4,12 +4,12 @@ void automation.mapCategory2(String leadid)
 leadid = standalone.dedupeLead(leadid);
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 interestValue = leadRecord.get("Interest");
-// ===== Lead Source mapping: "Website Visit" (SalesIQ chatbot Add Lead card) -> "SalesIQ" =====
+// ===== Lead Source mapping: "Website Visit" -> "IGP" (SalesIQ chatbot leads arrive as "Chat", see leadSource) =====
 leadSource = leadRecord.get("Lead_Source");
 if(leadSource != null && leadSource.trim() == "Website Visit")
 {
 	sourceMap = Map();
-	sourceMap.put("Lead_Source","SalesIQ");
+	sourceMap.put("Lead_Source","IGP");
 	sourceResponse = zoho.crm.updateRecord("Leads",leadid,sourceMap);
 	info sourceResponse;
 }
