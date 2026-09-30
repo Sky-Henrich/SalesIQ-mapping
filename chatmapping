@@ -4,16 +4,24 @@ void automation.mapCategory2(String leadid)
 leadid = standalone.dedupeLead(leadid);
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 interestValue = leadRecord.get("Interest");
-// ===== Lead Source mapping: "Website Visit" -> "IGP", "Chat" (SalesIQ chatbot) -> "SalesIQ" =====
+// ===== Lead Source mapping: "Website Visit" -> "IGP", "Chat" (SalesIQ chatbot) -> "SalesIQ",
+// and Messaging Channel "Facebook Messenger" -> "SalesIQ" =====
 // Chat is also handled by Lead_Source; this is the backup if that function did not update it
 leadSourceMap = Map();
 leadSourceMap.put("Website Visit","IGP");
 leadSourceMap.put("Chat","SalesIQ");
 leadSource = ifnull(leadRecord.get("Lead_Source"),"").trim();
-if(leadSourceMap.containsKey(leadSource))
+newLeadSource = leadSourceMap.get(leadSource);
+// SalesIQ chatbot on Facebook Messenger: Messaging Channel "Facebook Messenger" -> "SalesIQ", whatever the source
+messagingChannel = ifnull(leadRecord.get("Messaging_Channel"),"").trim();
+if(messagingChannel == "Facebook Messenger")
+{
+	newLeadSource = "SalesIQ";
+}
+if(newLeadSource != null && newLeadSource != leadSource)
 {
 	sourceMap = Map();
-	sourceMap.put("Lead_Source",leadSourceMap.get(leadSource));
+	sourceMap.put("Lead_Source",newLeadSource);
 	sourceResponse = zoho.crm.updateRecord("Leads",leadid,sourceMap,Map(),"crm_connection");
 	info sourceResponse;
 	if(sourceResponse.get("id") == null)
