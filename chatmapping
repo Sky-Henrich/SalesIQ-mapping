@@ -12,9 +12,11 @@ leadSourceMap.put("Website Visit","IGP");
 leadSourceMap.put("Chat","SalesIQ");
 leadSource = ifnull(leadRecord.get("Lead_Source"),"").trim();
 newLeadSource = leadSourceMap.get(leadSource);
-// SalesIQ chatbot on Facebook Messenger: Messaging Channel "Facebook Messenger" -> "SalesIQ", whatever the source
+// SalesIQ chatbot on Facebook Messenger: Messaging Channel "Facebook Messenger" -> "SalesIQ",
+// but only while Lead Source is still blank or the raw "Chat" value from the sync.
+// A Lead Source set any other way (e.g. "Meta Ads" set by hand) is never overwritten.
 messagingChannel = ifnull(leadRecord.get("Messaging_Channel"),"").trim();
-if(messagingChannel == "Facebook Messenger")
+if(messagingChannel == "Facebook Messenger" && (leadSource == "" || leadSource == "Chat"))
 {
 	newLeadSource = "SalesIQ";
 }
