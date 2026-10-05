@@ -46,20 +46,13 @@ if(leadSource != null && leadSource.trim() == "Chat")
 		}
 	}
 }
-// ===== Clear the Company SalesIQ fills in from the email domain (podav@abowned.com -> "abowned") =====
-// The chatbot never asks for a company, so a value equal to the email domain name is not real.
-// Runs on every call: SalesIQ pushes it in a later sync, not when the lead is created.
-companyValue = ifnull(leadRecord.get("Company"),"").trim();
-emailValue = ifnull(leadRecord.get("Email"),"").trim();
-if(companyValue != "" && emailValue.contains("@"))
+// ===== Individual leads have no company: clear Company when Top_Category is "Individual" =====
+// Runs on every call: SalesIQ pushes Company (from the email domain) in a later sync
+if(leadRecord.get("Top_Category") == "Individual" && ifnull(leadRecord.get("Company"),"").trim() != "")
 {
-	emailDomainName = emailValue.getSuffix("@").getPrefix(".");
-	if(emailDomainName != null && companyValue == emailDomainName)
-	{
-		companyMap = Map();
-		companyMap.put("Company",null);
-		companyResult = zoho.crm.updateRecord("Leads",leadId,companyMap,Map(),"crm_connection");
-		info "Cleared email-domain Company \"" + companyValue + "\": " + companyResult;
-	}
+	companyMap = Map();
+	companyMap.put("Company",null);
+	companyResult = zoho.crm.updateRecord("Leads",leadId,companyMap,Map(),"crm_connection");
+	info companyResult;
 }
 }

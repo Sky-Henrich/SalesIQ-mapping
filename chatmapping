@@ -120,16 +120,18 @@ else if(skipValues.contains(interestValue))
 // ===== Pillar field mapping (Top_Category -> Pillar Audience/Buyer/Outcome/Pain/Impulso Price, EN/ES) =====
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 topCategory = leadRecord.get("Top_Category");
+// ===== Individual leads have no company: clear Company (Lead_Source does the same after later syncs) =====
+if(topCategory == "Individual" && ifnull(leadRecord.get("Company"),"").trim() != "")
+{
+	companyMap = Map();
+	companyMap.put("Company",null);
+	companyResponse = zoho.crm.updateRecord("Leads",leadid,companyMap,Map(),"crm_connection");
+	info companyResponse;
+}
 // ===== Community mapping: Company -> Organization_Name =====
 if(topCategory == "Community")
 {
 	companyValue = ifnull(leadRecord.get("Company"),"").trim();
-	// Ignore the Company SalesIQ fills in from the email domain (Lead_Source clears it)
-	emailValue = ifnull(leadRecord.get("Email"),"").trim();
-	if(emailValue.contains("@") && companyValue == emailValue.getSuffix("@").getPrefix("."))
-	{
-		companyValue = "";
-	}
 	if(companyValue != "")
 	{
 		if(leadRecord.get("Organization_Name") != companyValue)
@@ -142,7 +144,7 @@ if(topCategory == "Community")
 	}
 	else
 	{
-		info "Skipped: Top_Category is Community but Company is empty or the email domain - no Organization_Name mapping";
+		info "Skipped: Top_Category is Community but Company is empty - no Organization_Name mapping";
 	}
 }
 audienceEN = Map();
