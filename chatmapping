@@ -123,20 +123,26 @@ topCategory = leadRecord.get("Top_Category");
 // ===== Community mapping: Company -> Organization_Name =====
 if(topCategory == "Community")
 {
-	companyValue = leadRecord.get("Company");
-	if(companyValue != null && companyValue.trim() != "")
+	companyValue = ifnull(leadRecord.get("Company"),"").trim();
+	// Ignore the Company SalesIQ fills in from the email domain (Lead_Source clears it)
+	emailValue = ifnull(leadRecord.get("Email"),"").trim();
+	if(emailValue.contains("@") && companyValue == emailValue.getSuffix("@").getPrefix("."))
 	{
-		if(leadRecord.get("Organization_Name") != companyValue.trim())
+		companyValue = "";
+	}
+	if(companyValue != "")
+	{
+		if(leadRecord.get("Organization_Name") != companyValue)
 		{
 			orgMap = Map();
-			orgMap.put("Organization_Name",companyValue.trim());
+			orgMap.put("Organization_Name",companyValue);
 			orgResponse = zoho.crm.updateRecord("Leads",leadid,orgMap,Map(),"crm_connection");
 			info orgResponse;
 		}
 	}
 	else
 	{
-		info "Skipped: Top_Category is Community but Company is empty - no Organization_Name mapping";
+		info "Skipped: Top_Category is Community but Company is empty or the email domain - no Organization_Name mapping";
 	}
 }
 audienceEN = Map();
