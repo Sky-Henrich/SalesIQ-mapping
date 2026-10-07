@@ -4,6 +4,20 @@ void automation.mapCategory2(String leadid)
 leadid = standalone.dedupeLead(leadid);
 leadRecord = zoho.crm.getRecordById("Leads",leadid);
 interestValue = leadRecord.get("Interest");
+// Five Pillars answer is saved by the bot in its own fields (Interest_Pillar_EN / Interest_Pillar_ES);
+// Individual / Community answers still come in the Interest field.
+// When a pillar was chosen it decides Top_Category, otherwise Interest does.
+pillarEN = ifnull(leadRecord.get("Interest_Pillar_EN"),"").trim();
+pillarES = ifnull(leadRecord.get("Interest_Pillar_ES"),"").trim();
+categoryValue = interestValue;
+if(pillarEN != "")
+{
+	categoryValue = pillarEN;
+}
+else if(pillarES != "")
+{
+	categoryValue = pillarES;
+}
 // ===== Lead Source mapping: "Website Visit" -> "IGP", "Chat" (SalesIQ chatbot) -> "SalesIQ",
 // and Messaging Channel "Facebook Messenger" -> "SalesIQ" =====
 // Chat is also handled by Lead_Source; this is the backup if that function did not update it
@@ -84,6 +98,9 @@ categoryMap.put("Visita: Hoteles","Visit");
 categoryMap.put("Reubicación: Legal","Relocate");
 categoryMap.put("Reside: Inmuebles","Stay");
 categoryMap.put("Vive: Servicios","Live");
+// Spanish (Website) - business type — Oct 2026: Stay label is "Reside: Inmueble" (was "Permanecer: Inmueble")
+categoryMap.put("Reside: Inmueble","Stay");
+categoryMap.put("Permanecer: Inmueble","Stay");
 // English business type - LEGACY labels (already matched CRM picklist verbatim)
 categoryMap.put("Visit","Visit");
 categoryMap.put("Experience","Experience");
@@ -102,9 +119,9 @@ skipValues = List();
 skipValues.add("Business Owner in Panama");
 skipValues.add("Propietario de negocio en Panamá");
 skipValues.add("Business Owner");
-if(categoryMap.containsKey(interestValue))
+if(categoryMap.containsKey(categoryValue))
 {
-	newValue = categoryMap.get(interestValue);
+	newValue = categoryMap.get(categoryValue);
 	if(leadRecord.get("Top_Category") != newValue)
 	{
 		updateMap = Map();
@@ -113,7 +130,7 @@ if(categoryMap.containsKey(interestValue))
 		info response;
 	}
 }
-else if(skipValues.contains(interestValue))
+else if(skipValues.contains(categoryValue))
 {
 	info "Skipped: Business owner - awaiting pillar selection";
 }
