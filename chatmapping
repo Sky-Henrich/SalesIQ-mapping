@@ -90,16 +90,22 @@ categoryMap.put("Vivir","Live");
 // Spanish (Website) - business type — CURRENT bot labels (Sept 2026 flow, as originally entered)
 categoryMap.put("Visita : Hoteles","Visit");
 categoryMap.put("Experiencia: Tours","Experience");
+categoryMap.put("EXPERIENCIA — Tours, restaurantes y transporte","Experience");
 categoryMap.put("Mudanza: Legal","Relocate");
 categoryMap.put("Estadía: Inmuebles","Stay");
 categoryMap.put("Vivir: Servicios","Live");
 // Spanish (Website) - business type — Sept 2026 CORRECTED labels (fixes spacing/wording typos above)
 categoryMap.put("Visita: Hoteles","Visit");
+categoryMap.put("VISITA — Hoteles y hospedaje","Visit");
 categoryMap.put("Reubicación: Legal","Relocate");
+categoryMap.put("REUBICACIÓN — Inmigración, mudanzas, colegios y seguros","Relocate");
 categoryMap.put("Reside: Inmuebles","Stay");
+categoryMap.put("RESIDE — Bienes raíces y alquileres","Stay");
 categoryMap.put("Vive: Servicios","Live");
+categoryMap.put("VIVE — Salud y servicios del hogar","Live");
 // Spanish (Website) - business type — Oct 2026: Stay label is "Reside: Inmueble" (was "Permanecer: Inmueble")
 categoryMap.put("Reside: Inmueble","Stay");
+categoryMap.put("RESIDE — Bienes raíces y alquileres","Stay");
 categoryMap.put("Permanecer: Inmueble","Stay");
 // English business type - LEGACY labels (already matched CRM picklist verbatim)
 categoryMap.put("Visit","Visit");
@@ -110,11 +116,16 @@ categoryMap.put("Live","Live");
 // English business type - CURRENT bot labels (Sept 2026 flow, as originally entered)
 categoryMap.put("Visit : Hotels","Visit");
 categoryMap.put("Experience: Tours","Experience");
+categoryMap.put("EXPERIENCE — Tours, restaurants, and transportation","Experience");
 categoryMap.put("Relocate: Legal","Relocate");
+categoryMap.put("RELOCATE — Immigration, moving, schools, and insurance","Relocate");
 categoryMap.put("Stay: Property","Stay");
+categoryMap.put("STAY — Real Estate and Rentals","Stay");
 categoryMap.put("Live: Services","Live");
+categoryMap.put("LIVE — Health and Home Services","Live");
 // English business type - Sept 2026 CORRECTED label (fixes spacing typo above)
 categoryMap.put("Visit: Hotels","Visit");
+categoryMap.put("VISIT — Hotels and accommodation","Visit");
 skipValues = List();
 skipValues.add("Business Owner in Panama");
 skipValues.add("Propietario de negocio en Panamá");
